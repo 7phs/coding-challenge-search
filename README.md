@@ -26,3 +26,7 @@ When you are finished, write up a short summary of why you made the choices you 
 - [ ] Write brief summary on the approach you took and the tools you used (max 500 words)
 - [ ] Include instructions on how to build/ run your solution
 - [ ] Send us a link to your new repo.
+
+## Search closest point
+
+[Closest pair of points](https://en.wikipedia.org/wiki/Closest_pair_of_points_problem#Planar_case)

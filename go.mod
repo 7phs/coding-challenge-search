@@ -1,6 +1,7 @@
 module github.com/7phs/coding-challenge-search
 
 require (
+	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gin-contrib/sse v0.0.0-20170109093832-22d885f9ecc7 // indirect
@@ -11,8 +12,8 @@ require (
 	github.com/hpcloud/tail v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.5 // indirect
-	github.com/lib/pq v1.0.0
 	github.com/mattn/go-isatty v0.0.4 // indirect
+	github.com/mattn/go-sqlite3 v1.9.0
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.6.0 // indirect

@@ -1,5 +1,6 @@
 package errCode
 
 const (
-	ErrDataUnmarshal = 100
+	ErrDataUnmarshal  = 100
+	ErrDataValidation = 110
 )

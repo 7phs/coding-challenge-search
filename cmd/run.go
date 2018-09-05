@@ -25,7 +25,11 @@ var RunCmd = &cobra.Command{
 
 		db.Init(config.Conf.DatabaseUrl)
 
-		model.Init()
+		model.Init(model.Dependencies{
+			SearchDataSource: db.MemoryItems,
+		})
+
+		restapi.Init(config.Conf.Stage)
 
 		srv := restapi.
 			NewServer(config.Conf).

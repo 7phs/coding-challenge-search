@@ -14,11 +14,14 @@ import (
 type SearchHandler struct {
 	request struct {
 		model.Location
-		Keywords string `form:"searchTerm"`
+		SearchTerm string `form:"searchTerm"`
+
+		keywords *model.SearchKeyword
 	}
 	response struct {
 		common.RespError
 		Data model.SearchResult `json:"data"`
+		Meta MetaSearchResponse `json:"meta"`
 	}
 }
 
@@ -26,6 +29,8 @@ func (o *SearchHandler) Bind(c *gin.Context) (errList common.ErrorRecordList) {
 	if err := c.ShouldBindWith(&o.request, binding.Default(c.Request.Method, c.ContentType())); err != nil {
 		errList.AddError(errCode.ErrDataUnmarshal, "search: ", err)
 	}
+
+	o.request.keywords = model.NewSearchKeywords(o.request.SearchTerm)
 
 	return
 }
@@ -35,7 +40,7 @@ func (o *SearchHandler) Validate() (errList common.ErrorRecordList) {
 		if err := o.request.Location.Validate(); err != nil {
 			// TODO:
 		}
-	} else if len(o.request.Keywords) == 0 {
+	} else if o.request.keywords.Empty() {
 		// TODO:
 	}
 
@@ -53,7 +58,7 @@ func Search(c *gin.Context) {
 		return
 	}
 
-	loggedId := "search: '" + handler.request.Keywords + "'+(" + handler.request.Location.String() + ")"
+	loggedId := "search: '" + handler.request.keywords.String() + "'+(" + handler.request.Location.String() + ")"
 
 	log.Info(loggedId + ", handle")
 	// VALIDATE

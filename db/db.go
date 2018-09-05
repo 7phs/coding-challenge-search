@@ -1,30 +1,31 @@
 package db
 
 import (
-	_ "github.com/lib/pq"
+	"github.com/7phs/coding-challenge-search/db/memory"
+	"github.com/7phs/coding-challenge-search/db/sqlite"
+	_ "github.com/mattn/go-sqlite3"
 	log "github.com/sirupsen/logrus"
 )
 
-var DB *Wrapper
+var (
+	MemoryItems *memory.Items
+)
 
 func Init(connection string) {
-	var (
-		err error
-	)
-
-	log.Info("DB: create a connection pool")
-	DB, err = NewWrapper(connection).
-		Init()
-	if err != nil {
-		log.Fatal("DB: failed to create a connection pool: ", err)
+	log.Info("DB: init a db")
+	if err := sqlite.Init(connection); err != nil {
+		log.Fatal("DB: init a db, failed: ", err)
 	}
 
-	if err := DB.Ping(); err != nil {
-		log.Fatal("DB: check DB connection - failed: ", err)
-	} else {
-		log.Info("DB: check DB connection - successful")
+	MemoryItems = memory.NewItems(sqlite.ItemsSource)
+
+	log.Info("DB: memory, init DB")
+	if err := MemoryItems.Init(); err != nil {
+		log.Fatal("DB: memory, init DB - failed: ", err)
 	}
 }
 
 func Shutdown() {
+	log.Info("DB: shutdown")
+	sqlite.Shutdown()
 }

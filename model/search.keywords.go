@@ -15,39 +15,44 @@ const (
 )
 
 var (
-	filterAlphaNum = regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\-]+`)
+	filterAlphaNum    = regexp.MustCompile(`[^a-zA-Zа-яА-Я0-9\-]+`)
+	NewSearchKeywords SearchKeywordFactory
 )
 
+type SearchKeywordFactory func(string) *SearchKeyword
+
 type SearchKeyword struct {
-	words []string
-	err   error
+	words  []string
+	lemmas []string
+	err    error
 }
 
-func NewSearchKeywords(keywords string) *SearchKeyword {
-	var (
-		words = make([]string, 0)
-		err   error
-	)
+func keywordsFilter(keywords string) (string, error) {
+	var err error
 
 	keywords = strings.TrimSpace(strings.ToLower(keywords))
 	if len(keywords) > int(config.Conf.KeywordsLimit) {
 		err = errors.New("k: length is greater than allowed " + config.Conf.KeywordsLimit.String())
 	} else {
 		keywords = filterAlphaNum.ReplaceAllString(keywords, " ")
-
-		for _, word := range strings.Split(keywords, " ") {
-			word := strings.TrimSpace(strings.ToLower(word))
-			if len(word) == 0 {
-				continue
-			}
-
-			words = append(words, word)
-		}
 	}
 
-	return &SearchKeyword{
-		words: words,
-		err:   err,
+	return keywords, err
+}
+
+func newSearchKeywords(lemmer Lemmer) SearchKeywordFactory {
+	return func(keywords string) *SearchKeyword {
+		o := &SearchKeyword{}
+
+		keywords, o.err = keywordsFilter(keywords)
+		if o.err == nil {
+			res := lemmer.Parse(keywords)
+
+			o.words = res.Words()
+			o.lemmas = res.Lemmas()
+		}
+
+		return o
 	}
 }
 
@@ -57,6 +62,10 @@ func (o *SearchKeyword) Empty() bool {
 
 func (o *SearchKeyword) Words() []string {
 	return o.words
+}
+
+func (o *SearchKeyword) Lemmas() []string {
+	return o.lemmas
 }
 
 func (o *SearchKeyword) String() string {

@@ -43,7 +43,7 @@ func NewConfig() *Config {
 		Addr:          helper.GetEnvStr(EnvConfigAddr, DefaultAddr),
 		Cors:          helper.GetEnvBool(EnvConfigCors, DefaultCors),
 		Stage:         helper.GetEnvStr(EnvConfigStage, DefaultStage),
-		DatabaseUrl:   helper.GetEnvStr(EnvConfigDatabaseUrl, ""),
+		DatabaseUrl:   helper.GetEnvStr(EnvConfigDatabaseUrl, "./fatlama.sqlite3"),
 		KeywordsLimit: datasize.ByteSize(helper.GetEnvInt64(EnvConfigKeywordsLimit, DefaultKeywordsLimit)),
 	}
 }

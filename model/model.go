@@ -10,6 +10,7 @@ var (
 
 type Dependencies struct {
 	SearchDataSource SearchDataSource
+	Lem              Lemmer
 }
 
 func Init(dep Dependencies) {
@@ -17,4 +18,7 @@ func Init(dep Dependencies) {
 
 	log.Info("model: create a model 'search'")
 	SearchModel = NewSearch(dep.SearchDataSource)
+
+	log.Info("model: make a factory keywords parser")
+	NewSearchKeywords = newSearchKeywords(dep.Lem)
 }

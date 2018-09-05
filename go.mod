@@ -2,6 +2,7 @@ module github.com/7phs/coding-challenge-search
 
 require (
 	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
+	github.com/clipperhouse/jargon v0.0.0-20180903212447-3f03cb991513
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gin-contrib/sse v0.0.0-20170109093832-22d885f9ecc7 // indirect
@@ -25,7 +26,6 @@ require (
 	github.com/stretchr/testify v1.2.2 // indirect
 	github.com/ugorji/go/codec v0.0.0-20180831062425-e253f1f20942 // indirect
 	golang.org/x/crypto v0.0.0-20180904163835-0709b304e793 // indirect
-	golang.org/x/net v0.0.0-20180826012351-8a410e7b638d // indirect
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
 	golang.org/x/sys v0.0.0-20180903190138-2b024373dcd9 // indirect
 	golang.org/x/text v0.3.0 // indirect

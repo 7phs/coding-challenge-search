@@ -30,9 +30,12 @@ func (o *Items) Load() (model.ItemsList, error) {
 	defer rows.Close()
 
 	result := make(model.ItemsList, 0, 100)
+	index := int64(1)
 
 	for rows.Next() {
-		record := model.Item{}
+		record := model.Item{
+			Id: index,
+		}
 
 		if err := load.Scan(rows, &record); err != nil {
 			return nil, errors.New(logPrefix + " - failed to scan a row, " + err.Error())

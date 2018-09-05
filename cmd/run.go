@@ -8,6 +8,7 @@ import (
 	"github.com/7phs/coding-challenge-search/db"
 	"github.com/7phs/coding-challenge-search/logger"
 	"github.com/7phs/coding-challenge-search/model"
+	"github.com/7phs/coding-challenge-search/nlp"
 	"github.com/7phs/coding-challenge-search/restapi"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -23,10 +24,15 @@ var RunCmd = &cobra.Command{
 
 		config.Init()
 
-		db.Init(config.Conf.DatabaseUrl)
+		nlp.Init()
+
+		db.Init(config.Conf.DatabaseUrl, db.Dependencies{
+			Lem: nlp.Lem,
+		})
 
 		model.Init(model.Dependencies{
 			SearchDataSource: db.MemoryItems,
+			Lem:              nlp.Lem,
 		})
 
 		restapi.Init(config.Conf.Stage)

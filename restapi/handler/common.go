@@ -7,6 +7,6 @@ type MetaResponse struct {
 }
 
 type MetaSearchResponse struct {
-	Keywords string         `json:"keywords"`
-	Location model.Location `json:"location"`
+	Filter *model.SearchFilter `json:"filter"`
+	Paging *model.Paging       `json:"paging"`
 }

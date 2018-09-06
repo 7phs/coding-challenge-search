@@ -20,7 +20,7 @@ type Result interface {
 	Reduce(Result) Result
 	Empty() bool
 
-	Items(int, int) model.ItemsList
+	Items(*model.Paging) model.ItemsList
 	ItemsWithRateById() model.ItemWithRateList
 	ItemsWithRateByRate() model.ItemWithRateList
 }
@@ -83,16 +83,13 @@ func (o *ItemResult) Empty() bool {
 	return o == nil || len(o.recordsById) == 0
 }
 
-func (o *ItemResult) Items(start, limit int) model.ItemsList {
+func (o *ItemResult) Items(paging *model.Paging) model.ItemsList {
 	// specific case - no one joining or intersect
 	// just using already sorted list
 	if o.recordsByRate != nil {
-		if start > len(o.recordsByRate) {
+		start, limit, err := paging.StartLimit(len(o.recordsByRate))
+		if err != nil {
 			return nil
-		}
-
-		if start+limit > len(o.recordsByRate) {
-			limit = len(o.recordsByRate) - start
 		}
 
 		return o.recordsByRate[start:limit].ItemsList()
@@ -100,23 +97,18 @@ func (o *ItemResult) Items(start, limit int) model.ItemsList {
 
 	s := time.Now()
 	copied := o.recordsById.Copy()
-	log.Debug("copied ", time.Since(s))
+	log.Debug("result: list copied in ", time.Since(s))
 
 	s = time.Now()
 	copied.Sort()
-	log.Debug("sorted ", time.Since(s))
+	log.Debug("result: list sorted in ", time.Since(s))
 
-	if start > len(copied) {
+	start, limit, err := paging.StartLimit(len(copied))
+	if err != nil {
 		return nil
 	}
 
-	if start+limit > len(copied) {
-		limit = len(copied) - start
-	}
-
-	copied = copied[start:limit]
-
-	return copied.ItemsList()
+	return copied[start:limit].ItemsList()
 }
 
 func (o *ItemResult) ItemsWithRateById() model.ItemWithRateList {

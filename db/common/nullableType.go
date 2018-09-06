@@ -177,7 +177,13 @@ func (n *NullTime) Scan(value interface{}) (err error) {
 		return
 	}
 
-	*n.V = value.(time.Time)
+	switch v := value.(type) {
+	case time.Time:
+		*n.V = v
+	case string:
+		*n.V, err = time.Parse(time.RFC3339, v)
+	}
+
 	return
 }
 

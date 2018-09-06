@@ -3,6 +3,8 @@ package index
 import (
 	"os"
 
+	"github.com/7phs/coding-challenge-search/nlp"
+
 	"github.com/7phs/coding-challenge-search/model"
 )
 
@@ -25,14 +27,14 @@ func (o *LemmaStat) Add(lemmas []string) *LemmaStat {
 }
 
 type Words struct {
-	lemmer model.Lemmer
+	lemmer nlp.Lemmer
 
 	total   *LemmaStat
 	mapping map[*model.Item]*LemmaStat
 	index   map[string]*ItemResult
 }
 
-func NewIndexWords(lemmer model.Lemmer) *Words {
+func NewIndexWords(lemmer nlp.Lemmer) *Words {
 	return &Words{
 		lemmer: lemmer,
 

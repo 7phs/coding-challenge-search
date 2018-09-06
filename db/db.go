@@ -2,11 +2,10 @@ package db
 
 import (
 	"github.com/7phs/coding-challenge-search/db/cache"
-	"github.com/7phs/coding-challenge-search/db/index"
 	"github.com/7phs/coding-challenge-search/db/memory"
+	"github.com/7phs/coding-challenge-search/db/memory/index"
 	"github.com/7phs/coding-challenge-search/db/sqlite"
-	"github.com/7phs/coding-challenge-search/model"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/7phs/coding-challenge-search/nlp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,7 +14,7 @@ var (
 )
 
 type Dependencies struct {
-	Lem model.Lemmer
+	Lem nlp.Lemmer
 }
 
 func Init(connection string, dep Dependencies) {

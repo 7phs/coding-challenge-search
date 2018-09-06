@@ -15,6 +15,12 @@ const (
 	DefaultLimit = 20
 )
 
+type SearchHandlerResponse struct {
+	common.RespError
+	Data model.ItemsList    `json:"data"`
+	Meta MetaSearchResponse `json:"meta"`
+}
+
 type SearchHandler struct {
 	request struct {
 		model.Location
@@ -23,11 +29,7 @@ type SearchHandler struct {
 
 		keywords *model.SearchKeyword
 	}
-	response struct {
-		common.RespError
-		Data model.ItemsList    `json:"data"`
-		Meta MetaSearchResponse `json:"meta"`
-	}
+	response SearchHandlerResponse
 }
 
 func (o *SearchHandler) Bind(c *gin.Context) (errList common.ErrorRecordList) {

@@ -1,9 +1,18 @@
 package nlp
 
 var (
-	Lem *Lemmer
+	Lem *JargonLemmer
 )
 
+type Lemmer interface {
+	Parse(string) LemResult
+}
+
+type LemResult interface {
+	Words() []string
+	Lemmas() []string
+}
+
 func Init() {
-	Lem = NewLemmer(DictStackExchange)
+	Lem = NewJargonLemmer(DictStackExchange)
 }

@@ -13,54 +13,6 @@ const (
 	RadialCoefficient = math.Pi / 180.0
 )
 
-type LocationInt64 struct {
-	loc Location
-
-	Lat  int
-	Long int
-}
-
-func NewLocationInt64(loc Location, precision int) *LocationInt64 {
-	lat := int(loc.Lat * float64(precision))
-	long := int(loc.Long * float64(precision))
-
-	return &LocationInt64{
-		loc: Location{
-			Lat:  float64(lat / precision),
-			Long: float64(long / precision),
-		},
-
-		Lat:  lat,
-		Long: long,
-	}
-}
-
-func (o *LocationInt64) PreCalc() *LocationInt64 {
-	o.loc.PreCalc()
-
-	return o
-}
-
-func (o *LocationInt64) Distance(r Location) float64 {
-	return o.loc.Distance(r)
-}
-
-func (o *LocationInt64) Compare(r *LocationInt64) int {
-	if o.Lat < r.Lat {
-		return -1
-	} else if o.Lat > r.Lat {
-		return 1
-	}
-
-	if o.Long < r.Long {
-		return -1
-	} else if o.Lat > r.Lat {
-		return 1
-	}
-
-	return 0
-}
-
 type Location struct {
 	Lat  float64 `json:"lat" form:"lat"`
 	Long float64 `json:"long" form:"long"`
@@ -113,4 +65,52 @@ func (o Location) Validate() error {
 
 func (o Location) Empty() bool {
 	return o.Lat == 0 && o.Long == 0
+}
+
+type LocationInt64 struct {
+	loc Location
+
+	Lat  int
+	Long int
+}
+
+func NewLocationInt64(loc Location, precision int) *LocationInt64 {
+	lat := int(loc.Lat * float64(precision))
+	long := int(loc.Long * float64(precision))
+
+	return &LocationInt64{
+		loc: Location{
+			Lat:  float64(lat) / float64(precision),
+			Long: float64(long) / float64(precision),
+		},
+
+		Lat:  lat,
+		Long: long,
+	}
+}
+
+func (o *LocationInt64) PreCalc() *LocationInt64 {
+	o.loc.PreCalc()
+
+	return o
+}
+
+func (o *LocationInt64) Distance(r Location) float64 {
+	return o.loc.Distance(r)
+}
+
+func (o *LocationInt64) Compare(r *LocationInt64) int {
+	if o.Lat < r.Lat {
+		return -1
+	} else if o.Lat > r.Lat {
+		return 1
+	}
+
+	if o.Long < r.Long {
+		return -1
+	} else if o.Long > r.Long {
+		return 1
+	}
+
+	return 0
 }

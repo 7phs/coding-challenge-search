@@ -8,14 +8,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func DefaultRouter() http.Handler {
+func DefaultRouter(conf *config.Config) http.Handler {
 	log.Info("http/router: init")
 
 	router := gin.New()
 
 	//router.Use(gin.Recovery())
 	router.Use(gin.Logger())
-	if config.Conf.Cors {
+	if conf.Cors {
 		router.Use(AllowCors())
 	}
 	// SEARCH

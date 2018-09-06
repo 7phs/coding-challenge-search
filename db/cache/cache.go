@@ -2,6 +2,7 @@ package cache
 
 import (
 	"encoding/hex"
+	"os"
 	"sync"
 	"time"
 
@@ -32,17 +33,27 @@ func (o *Items) List(filter *model.SearchFilter, paging *model.Paging) (model.It
 
 	if data, ok := o.Load(key); ok {
 		log.Info(logPrefix + " - found")
-		return data.(model.ItemsList), nil
+
+		switch v := data.(type) {
+		case error:
+			return nil, v
+		case model.ItemsList:
+			return v, nil
+		default:
+			return nil, os.ErrInvalid
+		}
 	}
 
 	log.Info(logPrefix + " - request a source")
 	start := time.Now()
 	data, err := o.source.List(filter, paging)
 	if err != nil {
+		o.Store(key, err)
+
 		log.Error(logPrefix+" - failed to request a source, ", err)
 		return nil, err
 	}
-	log.Info(logPrefix+" - request a source for ", time.Since(start))
+	log.Debug(logPrefix+" - request a source in ", time.Since(start))
 
 	o.Store(key, data)
 

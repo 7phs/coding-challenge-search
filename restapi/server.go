@@ -36,7 +36,7 @@ func NewServer(conf *config.Config) *Server {
 	return &Server{
 		Server: http.Server{
 			Addr:         conf.Addr,
-			Handler:      handler.DefaultRouter(),
+			Handler:      handler.DefaultRouter(conf),
 			ReadTimeout:  readTimeout,
 			WriteTimeout: writeTimeout,
 		},

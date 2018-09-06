@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/7phs/coding-challenge-search/config"
 	"github.com/7phs/coding-challenge-search/errCode"
+	"github.com/7phs/coding-challenge-search/nlp"
+	"github.com/c2h5oh/datasize"
 )
 
 const (
@@ -27,12 +30,12 @@ type SearchKeyword struct {
 	err    error
 }
 
-func keywordsFilter(keywords string) (string, error) {
+func keywordsFilter(keywords string, limit int) (string, error) {
 	var err error
 
 	keywords = strings.TrimSpace(strings.ToLower(keywords))
-	if len(keywords) > int(config.Conf.KeywordsLimit) {
-		err = errors.New("k: length is greater than allowed " + config.Conf.KeywordsLimit.String())
+	if len(keywords) > limit {
+		err = errors.New("k: length is greater than allowed " + strconv.Itoa(limit))
 	} else {
 		keywords = filterAlphaNum.ReplaceAllString(keywords, " ")
 	}
@@ -40,12 +43,12 @@ func keywordsFilter(keywords string) (string, error) {
 	return keywords, err
 }
 
-func newSearchKeywords(lemmer Lemmer) SearchKeywordFactory {
+func FactorySearchKeywords(conf *config.Config, lemmer nlp.Lemmer) SearchKeywordFactory {
 	return func(keywords string) *SearchKeyword {
 		o := &SearchKeyword{}
 
-		keywords, o.err = keywordsFilter(keywords)
-		if o.err == nil {
+		keywords, o.err = keywordsFilter(keywords, int(conf.KeywordsLimit))
+		if o.err == nil && len(keywords) > 0 {
 			res := lemmer.Parse(keywords)
 
 			o.words = res.Words()
@@ -61,19 +64,33 @@ func (o *SearchKeyword) Empty() bool {
 }
 
 func (o *SearchKeyword) Words() []string {
+	if o == nil {
+		return nil
+	}
+
 	return o.words
 }
 
 func (o *SearchKeyword) Lemmas() []string {
+	if o == nil {
+		return nil
+	}
+
 	return o.lemmas
 }
 
 func (o *SearchKeyword) String() string {
+	if o == nil {
+		return "nil"
+	}
+
 	return strings.Join(o.words, ", ")
 }
 
 func (o *SearchKeyword) Validate() (errList errCode.ErrList) {
-	if o.err != nil {
+	if o == nil {
+		errList.Add(errors.New("empty"))
+	} else if o.err != nil {
 		errList.Add(o.err)
 	} else {
 		if len(o.words) == 0 {
@@ -84,4 +101,16 @@ func (o *SearchKeyword) Validate() (errList errCode.ErrList) {
 	}
 
 	return
+}
+
+func MockNewSearchKeywords(limit int) func() {
+	preNewSearchKeywords := NewSearchKeywords
+
+	NewSearchKeywords = FactorySearchKeywords(&config.Config{
+		KeywordsLimit: datasize.ByteSize(limit),
+	}, nlp.NewMockLemmer())
+
+	return func() {
+		NewSearchKeywords = preNewSearchKeywords
+	}
 }

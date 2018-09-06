@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/7phs/coding-challenge-search/db/index"
+	"github.com/7phs/coding-challenge-search/db/memory/index"
 	"github.com/7phs/coding-challenge-search/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -42,7 +42,7 @@ func (o *Items) Init() error {
 	if err := o.reindex(); err != nil {
 		return errors.New(logPrefix + " failed to reindex items, " + err.Error())
 	}
-	log.Info(logPrefix + " reindexing records for " + time.Since(start).String())
+	log.Info(logPrefix + " reindexing records in " + time.Since(start).String())
 
 	return nil
 }
@@ -92,7 +92,7 @@ func (o *Items) List(filter *model.SearchFilter, paging *model.Paging) (model.It
 		return nil, errors.New("memory/items: not found")
 	}
 
-	result := total.Items(paging.Start, paging.Limit)
+	result := total.Items(paging)
 
 	if result == nil {
 		return nil, errors.New("memory/items: start is out of bound")

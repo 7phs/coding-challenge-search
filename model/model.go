@@ -1,6 +1,8 @@
 package model
 
 import (
+	"github.com/7phs/coding-challenge-search/config"
+	"github.com/7phs/coding-challenge-search/nlp"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -10,7 +12,7 @@ var (
 
 type Dependencies struct {
 	SearchDataSource SearchDataSource
-	Lem              Lemmer
+	Lem              nlp.Lemmer
 }
 
 func Init(dep Dependencies) {
@@ -20,5 +22,5 @@ func Init(dep Dependencies) {
 	SearchModel = NewSearch(dep.SearchDataSource)
 
 	log.Info("model: make a factory keywords parser")
-	NewSearchKeywords = newSearchKeywords(dep.Lem)
+	NewSearchKeywords = FactorySearchKeywords(config.Conf, dep.Lem)
 }

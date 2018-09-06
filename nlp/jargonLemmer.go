@@ -3,7 +3,6 @@ package nlp
 import (
 	"strings"
 
-	"github.com/7phs/coding-challenge-search/model"
 	"github.com/clipperhouse/jargon"
 	"github.com/clipperhouse/jargon/stackexchange"
 )
@@ -27,17 +26,17 @@ func (o DictType) Dictionary() jargon.Dictionary {
 	}
 }
 
-type Lemmer struct {
+type JargonLemmer struct {
 	lemmer *jargon.Lemmatizer
 }
 
-func NewLemmer(dict DictType) *Lemmer {
-	return &Lemmer{
+func NewJargonLemmer(dict DictType) *JargonLemmer {
+	return &JargonLemmer{
 		lemmer: jargon.NewLemmatizer(dict.Dictionary(), MaxGramLen),
 	}
 }
 
-func (o Lemmer) Parse(line string) model.LemResult {
+func (o JargonLemmer) Parse(line string) LemResult {
 	line = strings.ToLower(line)
 
 	result := LemmerResult{}
@@ -72,25 +71,4 @@ func (o Lemmer) Parse(line string) model.LemResult {
 	}
 
 	return result
-}
-
-type LemmerResult struct {
-	words  []string
-	lemmas []string
-}
-
-func (o *LemmerResult) AddWord(word string) {
-	o.words = append(o.words, word)
-}
-
-func (o *LemmerResult) AddLemma(lemma string) {
-	o.lemmas = append(o.lemmas, lemma)
-}
-
-func (o LemmerResult) Words() []string {
-	return o.words
-}
-
-func (o LemmerResult) Lemmas() []string {
-	return o.lemmas
 }

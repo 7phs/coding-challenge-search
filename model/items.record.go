@@ -3,11 +3,11 @@ package model
 import "sort"
 
 type Item struct {
-	Id       int64
-	Name     string
-	Location Location
-	Url      string
-	Imgs     []string
+	Id       int64    `json:"-"`
+	Name     string   `json:"item_name"`
+	Location Location `json:"loc"`
+	Url      string   `json:"item_url"`
+	Imgs     []string `json:"img_urls"`
 }
 
 type ItemsList []*Item
@@ -56,6 +56,10 @@ func NewItemWithRate(record *Item, rate float64) *ItemWithRate {
 type ItemWithRateList []*ItemWithRate
 
 func (o ItemWithRateList) ItemsList() ItemsList {
+	if len(o) == 0 {
+		return nil
+	}
+
 	result := make(ItemsList, 0, len(o))
 
 	for _, rec := range o {
@@ -71,7 +75,7 @@ func (o *ItemWithRateList) Add(record *ItemWithRate) {
 
 func (o *ItemWithRateList) SortById() ItemWithRateList {
 	sort.Slice(*o, func(i, j int) bool {
-		return (*o)[i].Id < (*o)[j].Id
+		return (*o)[i].CompareId((*o)[j]) < 0
 	})
 
 	return *o
@@ -87,6 +91,10 @@ func (o *ItemWithRateList) Sort() ItemWithRateList {
 
 // Both lists should be sorted
 func (o ItemWithRateList) Intersect(r ItemWithRateList) ItemWithRateList {
+	if len(o) == 0 || len(r) == 0 {
+		return nil
+	}
+
 	result := make(ItemWithRateList, 0, (len(o)+len(r))/2)
 
 	for i, j := 0, 0; i < len(o) && j < len(r); {

@@ -28,6 +28,8 @@ func Init() {
 	Conf = NewConfig()
 
 	Conf.Validate()
+
+	Conf.LogInfo()
 }
 
 type Config struct {
@@ -54,5 +56,20 @@ func (o *Config) Validate() {
 	err := validate.Struct(o)
 	if err != nil {
 		log.Errorf("config: %+v", err)
+	}
+}
+
+func (o *Config) LogInfo() {
+	for _, info := range []*struct {
+		name  string
+		value interface{}
+	}{
+		{name: "addr", value: o.Addr},
+		{name: "cors", value: o.Cors},
+		{name: "stage", value: o.Stage},
+		{name: "db_url", value: o.DatabaseUrl},
+		{name: "keywords_limit", value: o.KeywordsLimit},
+	} {
+		log.Info("config: "+info.name+" - '", info.value, "'")
 	}
 }

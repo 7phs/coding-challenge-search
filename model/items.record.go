@@ -3,7 +3,7 @@ package model
 import "sort"
 
 type Item struct {
-	Id       int64    `json:"-"`
+	Id       int64    `json:"Id"`
 	Name     string   `json:"item_name"`
 	Location Location `json:"loc"`
 	Url      string   `json:"item_url"`

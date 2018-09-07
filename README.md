@@ -10,7 +10,7 @@
 
 A developer should load all dependencies library before building a binary, run command:
 ```bash
-GO111MODULE=on go mode vendor
+GO111MODULE=on go mod vendor
 ``` 
 
 Then building an executable:

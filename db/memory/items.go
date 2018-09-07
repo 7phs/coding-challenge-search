@@ -3,6 +3,7 @@ package memory
 import (
 	"errors"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/7phs/coding-challenge-search/db/memory/index"
@@ -12,6 +13,11 @@ import (
 
 type ItemsSource interface {
 	Load() (model.ItemsList, error)
+}
+
+type itemsListResult struct {
+	result index.Result
+	err    error
 }
 
 type Items struct {
@@ -54,39 +60,75 @@ func (o *Items) load() (err error) {
 }
 
 func (o *Items) reindex() error {
-	for _, record := range o.list {
-		for _, idx := range o.indexes {
-			idx.Add(record)
-		}
-	}
+	var wait sync.WaitGroup
 
 	for _, idx := range o.indexes {
-		idx.Finish()
+		wait.Add(1)
+		go func(idx index.ItemIndex) {
+			defer wait.Done()
+
+			for _, record := range o.list {
+				idx.Add(record)
+			}
+
+			idx.Finish()
+		}(idx)
 	}
+
+	wait.Wait()
 
 	return nil
 }
 
 func (o *Items) List(filter *model.SearchFilter, paging *model.Paging) (model.ItemsList, error) {
-	var total index.Result
+	var (
+		total      index.Result
+		wait       sync.WaitGroup
+		waitResult sync.WaitGroup
+		ch         = make(chan *itemsListResult)
+	)
 
 	for _, idx := range o.indexes {
-		result, err := idx.Search(filter)
-		if err != nil {
-			if err != os.ErrInvalid && err != os.ErrNotExist {
-				log.Error("memory/items: failed to request a search result, ", err)
+		wait.Add(1)
+		go func(idx index.ItemIndex) {
+			defer wait.Done()
+
+			result, err := idx.Search(filter)
+			if err != nil {
+				if err != os.ErrInvalid && err != os.ErrNotExist {
+					log.Error("memory/items: failed to request a search result, ", err)
+				}
 			}
 
-			continue
-		}
-
-		if total == nil {
-			total = result
-			total.SetMode(model.KeywordsModeAnd)
-		} else {
-			total = total.Reduce(result)
-		}
+			ch <- &itemsListResult{
+				result: result,
+				err:    err,
+			}
+		}(idx)
 	}
+
+	waitResult.Add(1)
+	go func() {
+		defer waitResult.Done()
+
+		for res := range ch {
+			if res.err != nil || res.result == nil {
+				continue
+			}
+
+			if total == nil {
+				total = res.result
+				total.SetMode(model.KeywordsModeAnd)
+			} else {
+				total = total.Reduce(res.result)
+			}
+		}
+	}()
+
+	wait.Wait()
+
+	close(ch)
+	waitResult.Wait()
 
 	if total == nil {
 		return nil, errors.New("memory/items: not found")

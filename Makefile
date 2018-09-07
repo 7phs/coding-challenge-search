@@ -11,11 +11,6 @@ testing:
 	go mod vendor
 	LOG_LEVEL=error ADDR=:8080 go test ./...
 
-bench: export GO111MODULE=on
-bench:
-	go mod vendor
-	LOG_LEVEL=error ADDR=:8080 go test ./... -bench . -run ^$$
-
 run: export GO111MODULE=on
 run:
 	go mod vendor

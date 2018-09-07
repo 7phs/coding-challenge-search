@@ -1,32 +1,143 @@
-# Backend Challenge
-## Introduction
-Fat Lama relies heavily on our search in order for users to be able to find the items they need. The main two factors in the search are:
-- **Text match**: the user types a word or phrase that they want to find, and the search returns items that match this.
-- **Location**: the user indicates their location (through geolocation or through typing in the location search box) and the search returns items near the user
+## Requirements
 
-On the production web & mobile app there are other factors that come into play such as lender rating, response time, categories, time since listing, and more. For this challenge though, we want you to focus only on the two main factors given above.
+1. Go 1.11+
 
-## The Challenge
-We want you to build a `GET /search` endpoint that will return the most appropriate 20 items given `searchTerm`, `lat` (latitude) and `lng` (longitude). e.g. `/search?searchTerm=camera&lat=51.948&lng=0.172943`. It is up to you to decide how to weight the two factors to return the most relevant results. We have provided you with a sqlite database containing just under 2000 items with the relevant fields.
+2. Libraries which used in a project will downloaded by ```go mod vendor`` command
 
-When you are finished, write up a short summary of why you made the choices you did in terms of technology and design. This should be no more than 500 words.
+## Build
 
-## Things to think about:
-- Think about points of failure and how your endpoint will perform under load.
-- Language/frameworks: Choose whatever language you will write your best code in. Please **do not choose a language/technology that you are unfamiliar with.**
-- Testing: use whatever tools you prefer to test your code appropriately
-- Try to implement appropriate [separation of concerns](https://effectivesoftwaredesign.com/2012/02/05/separation-of-concerns/) & modular code
-- Think hard about naming of functions and variables. Your code must be readable
-- Code style & file structure is up to you, but make sure it is consistent and easy to understand
+### Manual
 
-## Checklist for Challenge
-- [ ] Duplicate this repo (please do not fork it, see [instructions](https://help.github.com/articles/duplicating-a-repository/)). Bitbucket offers free private repos if you don't want to use a public one.
-- [ ] Build API endpoint for Fat Lama search with according to above specifications
-- [ ] Ensure all code is sufficiently tested
-- [ ] Write brief summary on the approach you took and the tools you used (max 500 words)
-- [ ] Include instructions on how to build/ run your solution
-- [ ] Send us a link to your new repo.
+A developer should load all dependencies library before building a binary, run command:
+```bash
+GO111MODULE=on go mode vendor
+``` 
 
-## Search closest point
+Then building an executable:
+```bash
+go build -o ./search-service
+``` 
 
-[Closest pair of points](https://en.wikipedia.org/wiki/Closest_pair_of_points_problem#Planar_case)
+### Using makefile
+
+Run a command
+```bash
+make build
+```
+
+### Using docker
+
+Run a command
+```bash
+make image
+```
+
+## Testing
+
+### Manual
+
+A developer should load all dependencies library before testing, run command:
+```bash
+GO111MODULE=on go mod vendor
+``` 
+
+Then building an executable:
+```bash
+go test ./...
+``` 
+
+### Using makefile
+
+Run a command
+```bash
+make testing
+```
+
+## Run
+
+### Quick
+
+Run a service using a makefile command
+```bash
+make run
+```
+
+Or using built docker image
+
+```bash
+make image-run
+```
+
+### Manual
+
+Environment variable:
+
+- **ADDR** - address which a service listening. Default: ':8080'. Example: ':9090;
+
+- **CORS** - switching on response headers supporting CORS. Default: 'false'. Supported: 'true' or 'false'
+
+- **STAGE** - a name of running staging. Default: 'development'. Supported: 'production', 'development', 'testing'
+
+- **LOG_LEVEL** - a level of logging messages. Default: 'info'. Supported: 'debug', 'info', 'warning', 'error'
+
+- **DB_URL** - a path of a SQLite 3 db file. Default: './fatlama.sqlite3'.
+
+- **KEYWORDS_LIMIT** - a maximum length of a keyword line. Default: 4KB.
+
+Command to run:
+```bash
+STAGE=production ./search-service run 
+```
+
+# Implementation description
+
+Implementation of a search services based on a trade-off: source records will never changing after services started.
+
+A primary approaches - in-memory indexes.
+
+No one components are using synchronization, because data and indexes will not changing during service working.  
+
+## High-level architecture
+
+A general architecture of an implemented search engine (**db** directory) included following layers:
+
+1. **Cache**
+
+    A caching layer stores a result of each request even an error.
+    It helps prevent repeatedly execution heavy operations.
+
+    A hash of request's parameters is a key for a cache.
+
+2. **Indexes**
+
+    The layer contains a several indexes of source data. 
+    It is reindexing source data on initialization and using prepared indexes to quick search a requests's result.
+    
+    This layer is a good candidate to scaling horizontally.  
+
+3. **Storage**
+
+    The permanent or source storage of data.
+    It is using only on initialization to load all data into memory.
+
+## Indexes
+
+A requirements of a search engine will probably growing using new index types. 
+
+The current implementation is 
+
+## Tiles indexes
+
+    
+
+# Trade-off
+
+1. **Permanent data sources**
+    
+    
+
+2. **Without permanent storage of indexes.** 
+
+    Each time 
+  
+2. **Never cleaning cache**

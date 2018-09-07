@@ -91,11 +91,11 @@ STAGE=production ./search-service run
 
 # Implementation description
 
-Implementation of a search services based on a trade-off: source records will never changing after services started.
+Implementation of search services based on a trade-off: source records will never changing after services started.
 
 A primary approaches - in-memory indexes.
 
-No one components are using synchronization, because data and indexes will not changing during service working.  
+No one components are using synchronization, because data and indexes will not be changing during service work.  
 
 ## High-level architecture
 
@@ -104,16 +104,16 @@ A general architecture of an implemented search engine (**db** directory) includ
 1. **Cache**
 
     A caching layer stores a result of each request even an error.
-    It helps prevent repeatedly execution heavy operations.
+    It helps repeatedly to prevent the execution of heavy operations.
 
     A hash of request's parameters is a key for a cache.
 
 2. **Indexes**
 
-    The layer contains a several indexes of source data. 
-    It is reindexing source data on initialization and using prepared indexes to quick search a requests's result.
+    The layer contains several indexes of source data. 
+    It is reindexing source data on initialization and using prepared indexes to quickly search a requests' result.
     
-    This layer is a good candidate to scaling horizontally.  
+    This layer is an excellent candidate for scaling horizontally.  
 
 3. **Storage**
 
@@ -122,22 +122,56 @@ A general architecture of an implemented search engine (**db** directory) includ
 
 ## Indexes
 
-A requirements of a search engine will probably growing using new index types. 
+Requirements of a search engine will probably be growing the number of the new index types. 
 
-The current implementation is 
+The current implementation allows to growing the number of indexes just changing
+a line of code when configures the index list.
+
+The execution of the massive operation is an execution in different goroutines, and then results join and post-processed.
+
+There is just two kind of indexes implementing:
+
+1. **Words indexes** - stored a list of lemmatized keywords and linked records. Using to select a records
+   by search terms keywords.
+
+2. **Tiles indexes** - hierarchical geo-oriented tree, stored a sorted records list ordered
+   by precalculated distances by the center of each edge tile. 
 
 ## Tiles indexes
 
-    
+A primary challenge of this challenge (tautology) is reducing distance calculation, in my opinion.
+
+A brute-force solution is a calculating distance between a user's location and each item's location.
+
+Another way is a point of view on a problem from the side of use cases:
+
+1. A user will find the nearest point of his/her a home, and a home has a square or a "nearest" place, but not just a point.     
+
+2. A user will find inside a strict area.
+
+An idea of tiles indexes based on mapping services principles and items: different scaled tiles.
+
+Searching on big scaling tiles on the first stage and then dive in into smaller scaling tiles
+as children of the higher level tiles.
+
 
 # Trade-off
 
 1. **Permanent data sources**
     
+    An implementation doesn't support real-time reindexing of changed data, but possible implementing
+    inserting of the new records.
     
+    A primary goal of the challenge is solving searching performance bottleneck but
+    not working with real-time changed  
 
 2. **Without permanent storage of indexes.** 
 
-    Each time 
+    Source data will reindex each time on initializing and spending a little bit of time.
+    
+    A result of reindexing (data of the two indexes) will not be stored on a drive. As said before
+    I was implementing a search engine than its permanent storage. 
   
-2. **Never cleaning cache**
+3. **Never cleaning cache**
+
+    Related point 1. Cache never invalidated because a data are never changing.    

@@ -7,6 +7,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	defaultRateCoeff = 1.5
+)
+
 type ItemIndex interface {
 	Add(record *model.Item)
 	Finish()
@@ -38,9 +42,9 @@ func (o *ItemResult) Add(record *model.Item, rate float64) {
 	o.recordsByRate.Add(ratedRecord)
 }
 
-func (o *ItemResult) Normalize(maxDistance float64) {
+func (o *ItemResult) Normalize(start, limit float64) {
 	for _, item := range o.recordsById {
-		item.Rate = 1 - item.Rate/maxDistance
+		item.Rate = defaultRateCoeff - (item.Rate-start)/limit
 	}
 }
 

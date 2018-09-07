@@ -18,43 +18,73 @@ type TileNode struct {
 	location  model.LocationInt64
 	children  TileNodeList
 
+	minDistance float64
 	maxDistance float64
 	items       *ItemResult
 }
 
-func NewTileNode(level int) *TileNode {
-	precision := defaultPrecision / level
+func NewTileNode(level int, location model.LocationInt64) *TileNode {
+	var (
+		precision = defaultPrecision / level
+		items     *ItemResult
+	)
 	if precision < 1 {
 		precision = 1
 	}
 
+	if level == 1 {
+		items = &ItemResult{}
+	}
+
 	return &TileNode{
-		level:     level,
-		precision: precision,
+		level:       level,
+		precision:   precision,
+		location:    location,
+		minDistance: defaultMaxDistance,
+		items:       items,
 	}
 }
 
-func (o *TileNode) createEdgeNode(record *model.Item) *TileNode {
-	loc64 := model.NewLocationInt64(record.Location, o.precision)
+func (o *TileNode) Depth() int {
+	if len(o.children) == 0 {
+		return 0
+	}
+
+	return 1 + o.children[0].Depth()
+}
+
+func (o *TileNode) NodesCount() int {
+	if len(o.children) == 0 {
+		return 0
+	}
+
+	count := 0
+
+	for _, child := range o.children {
+		count += 1 + child.NodesCount()
+	}
+
+	return count
+}
+
+func (o *TileNode) addEdgeNode(location model.Location) *TileNode {
+	loc64 := model.NewLocationInt64(location, o.precision)
 
 	child := o.children.Has(loc64)
 	if child == nil {
-		child = NewTileNode(o.level / defaultDiscret)
-		child.location = *loc64.PreCalc()
+		child = NewTileNode(o.level/defaultDiscret, *loc64.PreCalc())
 
 		o.children.Add(child)
 		o.children.Sort()
 
 		if child.level == 1 {
-			child.items = &ItemResult{}
-
 			return child
 		}
 	} else if child.level == 1 {
 		return nil
 	}
 
-	return child.createEdgeNode(record)
+	return child.addEdgeNode(location)
 }
 
 func (o *TileNode) Add(record *model.Item) {
@@ -62,16 +92,19 @@ func (o *TileNode) Add(record *model.Item) {
 
 	o.items.Add(record, distance)
 
+	if o.minDistance > distance {
+		o.minDistance = distance
+	}
+
 	if o.maxDistance < distance {
 		o.maxDistance = distance
 	}
 }
 
-func (o *TileNode) Finish(maxDistance float64) {
-	o.items.Normalize(maxDistance)
+func (o *TileNode) Finish(start, limit float64) {
+	o.items.Normalize(start, limit)
 
 	o.items.Sort()
-
 }
 
 func (o *TileNode) Search(location model.Location, distance float64) *TileNodeResult {
@@ -143,27 +176,41 @@ func (o *TileNodeList) Add(node *TileNode) {
 	*o = append(*o, node)
 }
 
-func (o TileNodeList) MaxDistance() float64 {
-	result := 0.
+func (o TileNodeList) Factors() (float64, float64) {
+	max := 0.
+	min := 0.
 
-	for _, node := range o {
-		if result < node.maxDistance {
-			result = node.maxDistance
+	if len(o) > 0 {
+		min = defaultMaxDistance
+
+		for _, node := range o {
+			if min > node.minDistance {
+				min = node.minDistance
+			}
+			if max < node.maxDistance {
+				max = node.maxDistance
+			}
 		}
 	}
 
-	return result
+	if max <= min {
+		max = min + 1.
+	}
+
+	return min, max - min
 }
 
-func (o TileNodeList) Finish(maxDistance float64) {
+func (o TileNodeList) Finish() {
 	var wait sync.WaitGroup
+
+	start, limit := o.Factors()
 
 	for _, node := range o {
 		wait.Add(1)
 		go func(node *TileNode) {
 			defer wait.Done()
 
-			node.Finish(maxDistance)
+			node.Finish(start, limit)
 		}(node)
 	}
 

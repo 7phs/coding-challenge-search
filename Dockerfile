@@ -13,10 +13,12 @@ RUN apt-get update \
 EXPOSE 8080
 WORKDIR /root/
 COPY --from=0 /go/src/github.com/7phs/coding-challenge-search .
+COPY fatlama.sqlite3 ./fatlama.sqlite3
 
 ENV LOG_LEVEL info
 ENV STAGE production
 ENV ADDR :8080
 ENV CORS true
+ENV DB_URL ./fatlama.sqlite3
 
 CMD ["./search-service", "run"]

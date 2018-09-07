@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	defaultPrecision   = 1000
-	defaultDiscret     = 10
+	defaultPrecision   = 1000000
+	defaultDiscret     = 100
 	defaultMaxDistance = 20037.5
 )
 
@@ -20,14 +20,12 @@ type Tiles struct {
 
 func NewIndexTiles() *Tiles {
 	return &Tiles{
-		root: NewTileNode(defaultDiscret * defaultPrecision),
+		root: NewTileNode(defaultDiscret*defaultPrecision, model.LocationInt64{}),
 	}
 }
 
 func (o *Tiles) Add(record *model.Item) {
-	record.Location.PreCalc()
-
-	newEdgeNode := o.root.createEdgeNode(record)
+	newEdgeNode := o.root.addEdgeNode(record.Location)
 	if newEdgeNode != nil {
 		o.edgeNodes.Add(newEdgeNode)
 	}
@@ -45,12 +43,7 @@ func (o *Tiles) Add(record *model.Item) {
 }
 
 func (o *Tiles) Finish() {
-	maxDistance := o.edgeNodes.MaxDistance()
-	if maxDistance == 0 {
-		maxDistance = defaultMaxDistance
-	}
-
-	o.edgeNodes.Finish(maxDistance)
+	o.edgeNodes.Finish()
 }
 
 func (o *Tiles) Search(filter *model.SearchFilter) (Result, error) {

@@ -41,6 +41,8 @@ func (o *Items) Load() (model.ItemsList, error) {
 			return nil, errors.New(logPrefix + " - failed to scan a row, " + err.Error())
 		}
 
+		record.Location.PreCalc()
+
 		index++
 		result.Add(&record)
 	}

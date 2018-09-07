@@ -29,35 +29,36 @@ func TestItems_Load(t *testing.T) {
 		{
 			Id:       1,
 			Name:     "item1",
-			Location: model.Location{Lat: 50, Long: -5.1},
+			Location: *(&model.Location{Lat: 50, Long: -5.1}).PreCalc(),
 			Url:      "url1",
 			Imgs:     []string{"img1.1", "img1.2"},
 		},
 		{
 			Id:       2,
 			Name:     "item2",
-			Location: model.Location{Lat: 51.5, Long: -2.5},
+			Location: *(&model.Location{Lat: 51.5, Long: -2.5}).PreCalc(),
 			Imgs:     []string{"img2.1", "img2.2"},
 		},
 		{
 			Id:       3,
-			Location: model.Location{Lat: 52.15, Long: 0},
+			Location: *(&model.Location{Lat: 52.15, Long: 0}).PreCalc(),
 			Url:      "url3",
 			Imgs:     []string{"img3.1", "img3.2"},
 		},
 		{
 			Id:       4,
 			Name:     "item4",
-			Location: model.Location{Lat: 53.9, Long: 1.12},
+			Location: *(&model.Location{Lat: 53.9, Long: 1.12}).PreCalc(),
 			Url:      "url4",
 			Imgs:     []string{"img4.1", "img4.2"},
 		},
 		{
 			Id:       5,
 			Name:     "item5",
-			Location: model.Location{Lat: 54.76, Long: 2.45},
+			Location: *(&model.Location{Lat: 54.76, Long: 2.45}).PreCalc(),
 			Url:      "url5",
 		},
 	}
+
 	assert.Equal(t, expected, exist)
 }

@@ -1,6 +1,9 @@
 package model
 
-import "sort"
+import (
+	"encoding/json"
+	"sort"
+)
 
 type Item struct {
 	Id       int64    `json:"Id"`
@@ -8,6 +11,12 @@ type Item struct {
 	Location Location `json:"loc"`
 	Url      string   `json:"item_url"`
 	Imgs     []string `json:"img_urls"`
+}
+
+func (o *Item) String() string {
+	d, _ := json.Marshal(o)
+
+	return string(d)
 }
 
 type ItemsList []*Item
